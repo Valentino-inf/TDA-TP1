@@ -36,4 +36,4 @@ objetos_prueba = lista_objetos[:20]
 
 capacidad_prueba = 1000
 maximo_beneficio = mochila_fuerza_bruta(capacidad_prueba, objetos_prueba)
-print(f"¡Terminado! El beneficio máximo posible para estos 20 objetos es: {maximo_beneficio}")
+print(f"beneficio:{maximo_beneficio}")

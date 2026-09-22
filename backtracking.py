@@ -64,4 +64,4 @@ def mochila_backtracking(capacidad, objetos):
 capacidad_total, lista_objetos = leer_archivo_mochila("/home/valentino/facu/TDA/mochila1000.txt")
 
 maximo_beneficio = mochila_backtracking(capacidad_total, lista_objetos)
-print(f"El beneficio máximo posible es: {maximo_beneficio}")
+print(f"beneficio: {maximo_beneficio}")
