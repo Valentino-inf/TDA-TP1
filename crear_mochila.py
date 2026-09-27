@@ -11,7 +11,10 @@ def crear_mochila(n):
         arch.write(str(peso)+","+str(benef)+"\n")
     arch.close()
     
-crear_mochila(1000)
+crear_mochila(10)
+crear_mochila(20)
+crear_mochila(50)
+crear_mochila(90)
 
 # Esta función crea una mochila con una lista del tamaño indicado como parámetro
 # Los beneficios están en el rango 1-1000

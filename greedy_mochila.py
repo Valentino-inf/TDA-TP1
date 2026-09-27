@@ -1,8 +1,8 @@
 def mochila(W, objetos):
 
     objetos_validos = [
-    objeto for objeto in objetos
-    if objeto[0] <= W
+        objeto for objeto in objetos
+        if objeto[0] <= W
     ]
 
     objetos_ordenados = sorted(
@@ -36,6 +36,7 @@ def mochila(W, objetos):
     else:
         return [elemento_critico], elemento_critico[1]
 
+
 def leer_mochila(nombre_archivo):
     objetos = []
 
@@ -48,138 +49,137 @@ def leer_mochila(nombre_archivo):
 
     return W, objetos
 
+
 # Caso 1: gana P1
 
-#W = 10
-
-#objetos = [
-#    (4, 20),  # A
-#   (5, 20),  # B
-#   (3, 9)    # C
-#]
-
-#seleccionados, beneficio = mochila(W, objetos)
-
-#print("Objetos seleccionados:", seleccionados)
-#print("Beneficio:", beneficio)
-
+# W = 10
+#
+# objetos = [
+#     (4, 20),  # A
+#     (5, 20),  # B
+#     (3, 9)    # C
+# ]
+#
+# seleccionados, beneficio = mochila(W, objetos)
+#
+# print("Objetos seleccionados:", seleccionados)
+# print("Beneficio:", beneficio)
 
 
 # Caso 2: gana P2
 
 # W = 10
-
+#
 # objetos = [
 #     (2, 20),  # A
 #     (9, 81)   # B
 # ]
-
+#
 # seleccionados, beneficio = mochila(W, objetos)
-
+#
 # print("Objetos seleccionados:", seleccionados)
-# print("Beneficio:", beneficio) 
-
-
+# print("Beneficio:", beneficio)
 
 
 # Caso borde 1: no hay objetos
 
 # W = 10
 # objetos = []
-
+#
 # seleccionados, beneficio = mochila(W, objetos)
-
+#
 # print("Objetos seleccionados:", seleccionados)
 # print("Beneficio:", beneficio)
-
 
 
 # Caso borde 2: capacidad exacta
 
 # W = 10
-
+#
 # objetos = [
 #     (4, 20),
 #     (6, 18)
 # ]
-
+#
 # seleccionados, beneficio = mochila(W, objetos)
-
+#
 # print("Objetos seleccionados:", seleccionados)
 # print("Beneficio:", beneficio)
-
 
 
 # Caso borde 3: objeto que pesa más que la capacidad
 
 # W = 10
-
+#
 # objetos = [
 #     (4, 20),
 #     (15, 100)
 # ]
-
+#
 # seleccionados, beneficio = mochila(W, objetos)
-
+#
 # print("Objetos seleccionados:", seleccionados)
 # print("Beneficio:", beneficio)
-
-
 
 
 # Caso borde 4: ningún objeto entra
 
 # W = 10
-
+#
 # objetos = [
 #     (15, 100),
 #     (20, 200),
 #     (11, 50)
 # ]
-
+#
 # seleccionados, beneficio = mochila(W, objetos)
-
+#
 # print("Objetos seleccionados:", seleccionados)
 # print("Beneficio:", beneficio)
-
-
 
 
 # Caso borde 5: un único objeto ocupa exactamente toda la capacidad
 
 # W = 10
-
+#
 # objetos = [
 #     (10, 50)
 # ]
-
+#
 # seleccionados, beneficio = mochila(W, objetos)
-
+#
 # print("Objetos seleccionados:", seleccionados)
 # print("Beneficio:", beneficio)
 
 
+# Notas:
+# Implementado el algoritmo greedy de mochila 0/1 con garantía 1/2.
+# Se verificaron los ejemplos realizados manualmente y distintos casos borde.
+# Además, se probó con una instancia de 1000 objetos, obteniendo una solución de
+# beneficio 411063 y peso 49972 para una capacidad máxima de 50000.
 
 
-# Prueba con mochila1000.txt
+if __name__ == "__main__":
 
-W, objetos = leer_mochila("mochila1000.txt")
+    archivos = [
+        "mochila10.txt",
+        "mochila20.txt",
+        "mochila50.txt",
+        "mochila90.txt"
+    ]
 
-seleccionados, beneficio = mochila(W, objetos)
+    for nombre_archivo in archivos:
 
-peso_total = sum(objeto[0] for objeto in seleccionados)
+        W, objetos = leer_mochila(nombre_archivo)
 
-print("Cantidad de objetos:", len(objetos))
-print("Capacidad:", W)
-print("Cantidad seleccionada:", len(seleccionados))
-print("Beneficio obtenido:", beneficio)
-print("Peso total seleccionado:", peso_total)
-print("Respeta capacidad:", peso_total <= W)
+        seleccionados, beneficio = mochila(W, objetos)
 
+        peso_total = sum(objeto[0] for objeto in seleccionados)
 
-#Notas: 
-
-Implementado el algoritmo greedy de mochila 0/1 con garantía 1/2. 
-Se verificaron los ejemplos realizados manualmente y distintos casos borde. 
-Además, se probó con una instancia de 1000 objetos, obteniendo una solución de 
-beneficio 411063 y peso 49972 para una capacidad máxima de 50000.
+        print("\nArchivo:", nombre_archivo)
+        print("Cantidad de objetos:", len(objetos))
+        print("Capacidad:", W)
+        print("Cantidad seleccionada:", len(seleccionados))
+        print("Beneficio obtenido:", beneficio)
+        print("Peso total seleccionado:", peso_total)
+        print("Respeta capacidad:", peso_total <= W)
