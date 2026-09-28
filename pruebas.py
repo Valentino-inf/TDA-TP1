@@ -1,10 +1,8 @@
-# Cantidad de repeticiones según el algoritmo.
-# Para algoritmos rápidos se pueden usar varias repeticiones y promediar.
-# Para fuerza bruta se pueden usar menos repeticiones si los tiempos son altos.
-
 import time
 
 from greedy_mochila import mochila, leer_mochila
+from F_Bruta import mochila_fuerza_bruta
+from backtracking import mochila_backtracking
 
 
 ARCHIVOS = [
@@ -32,7 +30,15 @@ def medir_tiempo(algoritmo, W, objetos, repeticiones=1):
 for nombre_archivo in ARCHIVOS:
 
     W, objetos = leer_mochila(nombre_archivo)
+    n = len(objetos)
 
+    print("\n" + "="*50)
+    print("Archivo:", nombre_archivo)
+    print("Cantidad de objetos:", n)
+    print("Capacidad:", W)
+    
+    ##GREEDY
+    print("\n--- GREEDY ---")
     seleccionados, beneficio, tiempo = medir_tiempo(
         mochila,
         W,
@@ -42,10 +48,44 @@ for nombre_archivo in ARCHIVOS:
 
     peso_total = sum(objeto[0] for objeto in seleccionados)
 
-    print("\nArchivo:", nombre_archivo)
-    print("Cantidad de objetos:", len(objetos))
-    print("Capacidad:", W)
     print("Beneficio obtenido:", beneficio)
     print("Peso total:", peso_total)
     print("Respeta capacidad:", peso_total <= W)
     print("Tiempo promedio:", tiempo, "segundos")
+
+    ##BACKTRACKING
+    print("\n--- BACKTRACKING ---")
+    reps_bt = 30 if n < 50 else 15
+    
+    seleccionados, beneficio, tiempo = medir_tiempo(
+        mochila_backtracking,
+        W,
+        objetos,
+        repeticiones=reps_bt
+    )
+
+    peso_total = sum(objeto[0] for objeto in seleccionados)
+
+    print("Beneficio obtenido:", beneficio)
+    print("Peso total:", peso_total)
+    print("Respeta capacidad:", peso_total <= W)
+    print("Tiempo promedio:", tiempo, "segundos")
+
+    ##FBRUTA
+    print("\n--- FUERZA BRUTA ---")
+    if n <= 25:
+        seleccionados, beneficio, tiempo = medir_tiempo(
+            mochila_fuerza_bruta,
+            W,
+            objetos,
+            repeticiones=1
+        )
+
+        peso_total = sum(objeto[0] for objeto in seleccionados)
+
+        print("Beneficio obtenido:", beneficio)
+        print("Peso total:", peso_total)
+        print("Respeta capacidad:", peso_total <= W)
+        print("Tiempo promedio:", tiempo, "segundos")
+    else:
+        print(f"Omitido: {n} muchos objetos para Fbruta")

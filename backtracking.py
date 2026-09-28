@@ -3,16 +3,18 @@ import sys
 #aumento el limite de recursion(sino no compila)
 sys.setrecursionlimit(2500)
 
-def leer_archivo_mochila(nombre_archivo):
+def leer_mochila(nombre_archivo):
     objetos = []
-    with open(nombre_archivo, "r") as arch:
-        capacidad = int(arch.readline())
-        for linea in arch:
-            linea = linea.strip()
-            if linea:
-                datos = linea.split(",")
-                objetos.append((int(datos[0]), int(datos[1])))
-    return capacidad, objetos
+
+    with open(nombre_archivo, "r") as archivo:
+        W = int(archivo.readline())
+
+        for linea in archivo:
+            peso, beneficio = linea.strip().split(",")
+            objetos.append((int(peso), int(beneficio)))
+
+    return W, objetos
+
 
 def calcular_rama(indice, peso_acumulado, beneficio_acumulado, capacidad, objetos):
     beneficio = beneficio_acumulado
@@ -30,12 +32,14 @@ def mochila_backtracking(capacidad, objetos):
     objetos.sort(key=lambda x: x[1]/x[0], reverse=True)
     
     mejor_beneficio = 0
+    mejor_combinacion = []
 
-    def explorar(indice, peso_acumulado, beneficio_acumulado):
-        nonlocal mejor_beneficio
+    def explorar(indice, peso_acumulado, beneficio_acumulado, combinacion_actual):
+        nonlocal mejor_beneficio, mejor_combinacion
         
         if beneficio_acumulado > mejor_beneficio:
             mejor_beneficio = beneficio_acumulado
+            mejor_combinacion = combinacion_actual[:]
             
         if indice == len(objetos):
             return
@@ -48,20 +52,24 @@ def mochila_backtracking(capacidad, objetos):
         beneficio_actual = objetos[indice][1]
         
         if peso_acumulado + peso_actual <= capacidad:
+            combinacion_actual.append(objetos[indice])
             explorar(
                 indice + 1, 
                 peso_acumulado + peso_actual, 
-                beneficio_acumulado + beneficio_actual
+                beneficio_acumulado + beneficio_actual,
+                combinacion_actual
             )
+            combinacion_actual.pop()
 
-        explorar(indice + 1, peso_acumulado, beneficio_acumulado)
+        explorar(indice + 1, peso_acumulado, beneficio_acumulado, combinacion_actual)
 
-    explorar(0, 0, 0)
+    explorar(0, 0, 0, []) 
     
-    return mejor_beneficio
+    return mejor_combinacion, mejor_beneficio
 
 
-capacidad_total, lista_objetos = leer_archivo_mochila("/home/valentino/facu/TDA/mochila1000.txt")
+capacidad_total, lista_objetos = leer_mochila("mochila1000.txt")
 
-maximo_beneficio = mochila_backtracking(capacidad_total, lista_objetos)
+
+combinacion, maximo_beneficio = mochila_backtracking(capacidad_total, lista_objetos)
 print(f"beneficio: {maximo_beneficio}")
