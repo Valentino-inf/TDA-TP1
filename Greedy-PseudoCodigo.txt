@@ -1,0 +1,123 @@
+mochila(W, objetos)
+
+    objetosValidos = objetos cuyo peso <= W
+
+    ordenar objetosValidos de mayor a menor según vi/wi
+
+    seleccionados = lista vacía
+    pesoAcumulado = 0
+    beneficioAcumulado = 0
+    elementoCritico = ninguno
+
+    para cada objeto en objetosValidos:
+
+        si pesoAcumulado + objeto.peso <= W:
+            agregar objeto a seleccionados
+            pesoAcumulado = pesoAcumulado + objeto.peso
+            beneficioAcumulado = beneficioAcumulado + objeto.beneficio
+
+        sino:
+            elementoCritico = objeto
+            cortar
+
+    si elementoCritico = ninguno:
+        devolver seleccionados, beneficioAcumulado
+
+    si beneficioAcumulado >= elementoCritico.beneficio:
+        devolver seleccionados, beneficioAcumulado
+
+    sino:
+        devolver [elementoCritico], elementoCritico.beneficio
+
+-----------------------------------------------------------------------
+
+Seguimiento del pseudocodigo:
+
+Utilizo los ejemplos del planteo inicial
+
+    1. Gana P1
+        Capacidad: W=10
+        Objeto | Wi | Vi | Vi/Wi
+        A      | 4  | 20 | 5
+        B      | 5  | 20 | 4
+        C      | 3  |  9 | 3
+        
+        Como ya esta ordenado por vi/wi:
+            seleccionados = []
+            pesoAcumulado = 0
+            beneficioAcumulado = 0
+            elementoCritico = ninguno
+
+        Iteracion 1:
+            0 + 4 <= 10  ---> verdadero
+            seleccionados = [A]
+            pesoAcumulado = 4
+            beneficioAcumulado = 20
+            elementoCritico = ninguno
+
+        Iteracion 2: 
+            4 + 5 <= 10  ---> verdadero
+            seleccionados = [A, B]
+            pesoAcumulado = 9
+            beneficioAcumulado = 40
+            elementoCritico = ninguno
+
+        Iteracion 3: 
+            9 + 3 <= 10  ---> falso
+            elementoCritico = C
+        
+        P1 = beneficioAcumulado = 40
+        P2 = elementoCritico.beneficio = 9
+        40 >= 9
+
+        Salida:
+        objetos = [A, B]
+        beneficio = 40
+
+
+
+    2. Gana P2
+        Capacidad: W=10
+        Objeto | Wi | Vi | Vi/Wi
+        A      | 2  | 20 | 10
+        B      | 9  | 81 | 9
+        Como ya esta ordenado por vi/wi:
+        seleccionados = []
+        pesoAcumulado = 0
+        beneficioAcumulado = 0
+        elementoCritico = ninguno
+
+        Iteracion 1:
+            0 + 2 <= 10  ---> verdadero
+            seleccionados = [A]
+            pesoAcumulado = 2
+            beneficioAcumulado = 20
+            elementoCritico = ninguno
+
+        Iteracion 2:
+            2 + 9 <= 10  ---> falso
+            elementoCritico = B
+
+        P1 = beneficioAcumulado = 20
+        P2 = elementoCritico.beneficio = 81
+        20 >= 81 ---> falso
+
+        Salida:
+        objetos = [B]
+        beneficio = 81
+
+
+-------------------------------------------------------------------
+
+Analisis de complejidad del pseudocodigo
+Complejidad:
+    -Filtrar los objetos cuyo peso sea mayor que W: O(n)
+    -Ordenar los n objetos segun vi/wi: O(n log n) por mergesort
+    -Recorrer los objetos hasta encontrar el elemento critico: O(n)
+    -Las inicializaciones y comparaciones finales: O(1)
+
+    Entonces:
+        O(n) + O(n log n) + O(n) + O(1) = O(n log n)
+
+    La complejidad final del algoritmo es O(n log n), ya que
+    el ordenamiento de los objetos es la operacion dominante.

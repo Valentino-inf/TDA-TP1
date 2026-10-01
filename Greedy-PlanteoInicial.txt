@@ -1,0 +1,83 @@
+Garantia 1/2:
+    Que una solucion tenga beneficio de al menos 50% del de la solucion optima
+
+Problema de la Mochila:
+    -Mochila con capacidad maxima w
+    -Se tienen n objetos que ocupan una capacidad y tienen beneficios respectivos
+    wi y vi
+    -Cada objeto puede incluirse en la mochila si cabe o ser excluido, no 
+    puede ser fraccionado (0,1)
+    -Se desea determinar que elementos poner en la mochila 
+
+Solucion de garantia de calidad 1/2 (acorde a la ppt):
+    1. Ordenar los objetos segun su relacion valor/peso, de mayor a menor
+        obs.: el elemento debe poder entrar por si solo a la mochila.
+    2. Mientras quede capacidad, incorporar el proximo objeto
+        a. Cuando me encuentre con el primer objeto que no puedo sumar a la 
+        mochila, lo llamare "elemento critico" y lo guardo aparte
+    3. Una vez completada la mochila, comparo el beneficio de la solucion 
+    obtenida (P1) con el beneficio del elemento critico (P2). Si es mayor,
+    me quedo con la solucion obtenida. Si no, armo una nueva solucion que 
+    consista unicamente con el elemento critico.
+
+Por que esto tiene garantia 1/2 (acorde a la ppt):
+    1. Afirmaciones iniciales:
+        -La capacidad de la mochila es W, W1 es el peso total de los objetos que metimos,
+        P1 es el beneficio total de estos objetos
+        -El elemento critico tiene peso W2 y beneficio P2
+        -El elemento critico es el primero que queda afuera, entonces sabemos que:
+            W1 < W, W2 < W y W1+W2 > W , porque a. lo que ya metimos cabe en la mochila, b.
+            el elemento critico tambien cabe en la mochila y c. el elemento critico junto con
+            lo que ya hay en la mochila es mayor que la capacidad de la mochila (por eso es 
+            elemento critico)
+        -Los elementos estan ordenados por el coeficiente en forma descendente, entonces:
+            P1/W1 > P2/W2, es decir, la solucion 1 genera mas beneficio que el elemento
+            critico
+    2. Por lo cual, sabemos que:
+        -Los elementos P1+P2 son los que mejor aprovechan el espacio disponible, aunque
+        no entren ambos al mismo tiempo en la mochila
+        -Por lo menos una de las 2 soluciones (W1+W2) ocupa mas de la mitad de la 
+        mochila (matematicamente, porque si ambas pesaban exactamente la mitad o menos, 
+        tendriamos W1+W2<=W, pero sabemos que W1+W2>W)
+    3. Entonces:
+        -P1+P2 funciona como cota superior para la solucion optima de la mochila
+        -max(P1+P2) >= (P1+P1) /2
+        -Al compararlos y debemos quedarnos siempre con el mayor, de esta manera es imposible
+        obtener menos de la mitad de P1+P2
+        -La solucion obtenida es por lo menos la mitad de la solucion optima
+
+Por que es Greedy?
+    Porque en cada paso se elige el próximo objeto con mejor relación valor/peso 
+    disponible, tomando una decisión local sin volver atrás sobre las decisiones anteriores.
+
+Ejemplos
+    1. Gana P1
+        Capacidad: W=10
+        Objeto | Wi | Vi | Vi/Wi
+        A      | 4  | 20 | 5
+        B      | 5  | 20 | 4
+        C      | 3  |  9 | 3
+        Flujo:
+        -Entra A => peso 4, beneficio 20.
+        -Entra B => peso 9, beneficio 40.
+        -C no entra porque 9+3>10 => C es el elemento crítico.
+        -Entonces: 
+            W1=9, P1=40
+            W2=3, P2= 9
+        -Comparamos: 
+            P1=40 > P2=9
+        -Nos quedamos con A+B, beneficio 40.
+    2. Gana P2
+        Capacidad: W=10
+        Objeto | Wi | Vi | Vi/Wi
+        A      | 2  | 20 | 10
+        B      | 9  | 81 | 9
+        Flujo:
+        -Entra A => peso 2, beneficio 20.
+        -B no entra porque 2+9>10 => B es el elemento crítico.
+        -Entonces: 
+            W1=2, P1=20
+            W2=9, P2=81
+        -Comparamos: 
+            P2=81 > P1=20
+        -Nos quedamos con B, beneficio 81.
