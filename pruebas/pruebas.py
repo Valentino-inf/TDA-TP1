@@ -1,8 +1,8 @@
 import time
 
-from greedy_mochila import mochila, leer_mochila
-from F_Bruta import mochila_fuerza_bruta
-from backtracking import mochila_backtracking
+from greedy.greedy_mochila import mochila, leer_mochila
+from backtracking_fuerza_bruta.fuerza_bruta import mochila_fuerza_bruta
+from backtracking_fuerza_bruta.backtracking import mochila_backtracking
 
 
 ARCHIVOS = [
