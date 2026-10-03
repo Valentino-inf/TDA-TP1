@@ -25,11 +25,16 @@ def calcular_rama(indice, peso_acumulado, beneficio_acumulado, capacidad, objeto
         peso_actual += objetos[i][0]
         beneficio += objetos[i][1]
         i += 1
-        
+
+    # Fraccion del primer objeto que no entra: asi la cota es superior (relajacion lineal)
+    if i < len(objetos):
+        restante = capacidad - peso_actual
+        beneficio += objetos[i][1] * restante / objetos[i][0]
+
     return beneficio
 
 def mochila_backtracking(capacidad, objetos):
-    objetos.sort(key=lambda x: x[1]/x[0], reverse=True)
+    objetos = sorted(objetos, key=lambda x: x[1]/x[0], reverse=True)
     
     mejor_beneficio = 0
     mejor_combinacion = []
