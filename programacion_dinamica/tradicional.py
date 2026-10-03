@@ -1,44 +1,22 @@
-import sys
-from typing import List, Tuple
-from dataclasses import dataclass
-
-@dataclass
-class Item:
-    weight: int
-    benefit: int
-
-def parse_filename(filename: str) -> Tuple[int, List[Item]]:
-    with open(filename, 'r') as f:
-        lines = f.read().splitlines()
-        
-    if not lines:
-        return 0, []
-        
-    capacity = int(lines[0])
-    items = []
-    for line in lines[1:]:
-        if line.strip():
-            _weight, _benefit = map(int, line.split(','))
-            items.append(Item(_weight, _benefit))
-            
-    return capacity, items
-
-"""
-Planteo tradicional: maximiza el beneficio para un capacidad fija
-"""
-def solve(filename: str) -> int:
-    capacity, items = parse_filename(filename)
-    if not items:
-        return 0
-        
-    solutions = [0] * (capacity + 1)
+def mochila_pd_tradicional(capacidad, objetos):
+    n = len(objetos)
+    dp = [[0] * (capacidad + 1) for _ in range(n + 1)]
     
-    for item in items:
-        for w in range(capacity, item.weight - 1, -1):
-            solutions[w] = max(solutions[w], solutions[w - item.weight] + item.benefit)
+    for i in range(1, n + 1):
+        peso = objetos[i-1][0]
+        beneficio = objetos[i-1][1]
+        for w in range(capacidad + 1):
+            if peso <= w:
+                dp[i][w] = max(dp[i-1][w], dp[i-1][w - peso] + beneficio)
+            else:
+                dp[i][w] = dp[i-1][w]
+                
+    seleccionados = []
+    w = capacidad
+    for i in range(n, 0, -1):
+        if dp[i][w] != dp[i-1][w]:
+            seleccionados.append(objetos[i-1])
+            w -= objetos[i-1][0]
             
-    return solutions[capacity]
-
-if __name__ == '__main__':
-    if len(sys.argv) > 1:
-        print(solve(sys.argv[1]))
+    seleccionados.reverse()
+    return seleccionados, dp[n][capacidad]

@@ -71,10 +71,3 @@ def mochila_backtracking(capacidad, objetos):
     explorar(0, 0, 0, []) 
     
     return mejor_combinacion, mejor_beneficio
-
-
-capacidad_total, lista_objetos = leer_mochila("mochila1000.txt")
-
-
-combinacion, maximo_beneficio = mochila_backtracking(capacidad_total, lista_objetos)
-print(f"beneficio: {maximo_beneficio}")

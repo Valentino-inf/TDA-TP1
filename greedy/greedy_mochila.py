@@ -1,8 +1,8 @@
-def mochila(W, objetos):
+def mochila(capacidad, objetos):
 
     objetos_validos = [
         objeto for objeto in objetos
-        if objeto[0] <= W
+        if objeto[0] <= capacidad
     ]
 
     objetos_ordenados = sorted(
@@ -20,7 +20,7 @@ def mochila(W, objetos):
         peso = objeto[0]
         beneficio = objeto[1]
 
-        if peso_acumulado + peso <= W:
+        if peso_acumulado + peso <= capacidad:
             seleccionados.append(objeto)
             peso_acumulado += peso
             beneficio_acumulado += beneficio
@@ -41,13 +41,13 @@ def leer_mochila(nombre_archivo):
     objetos = []
 
     with open(nombre_archivo, "r") as archivo:
-        W = int(archivo.readline())
+        capacidad = int(archivo.readline())
 
         for linea in archivo:
             peso, beneficio = linea.strip().split(",")
             objetos.append((int(peso), int(beneficio)))
 
-    return W, objetos
+    return capacidad, objetos
 
 
 # Caso 1: gana P1
@@ -170,16 +170,16 @@ if __name__ == "__main__":
 
     for nombre_archivo in archivos:
 
-        W, objetos = leer_mochila(nombre_archivo)
+        capacidad, objetos = leer_mochila(nombre_archivo)
 
-        seleccionados, beneficio = mochila(W, objetos)
+        seleccionados, beneficio = mochila(capacidad, objetos)
 
         peso_total = sum(objeto[0] for objeto in seleccionados)
 
         print("\nArchivo:", nombre_archivo)
         print("Cantidad de objetos:", len(objetos))
-        print("Capacidad:", W)
+        print("Capacidad:", capacidad)
         print("Cantidad seleccionada:", len(seleccionados))
         print("Beneficio obtenido:", beneficio)
         print("Peso total seleccionado:", peso_total)
-        print("Respeta capacidad:", peso_total <= W)
+        print("Respeta capacidad:", peso_total <= capacidad)
