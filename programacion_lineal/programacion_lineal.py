@@ -4,8 +4,8 @@ import pulp
 #   Capacidad: máxima de la mochila
 #   Objetos: lista de tuplas (peso, valor)
 # Post:
+#   objetos_seleccionados: lista de tuplas de los objetos seleccionados
 #   valor_total: valor máximo obtenido
-#   objetos_seleccionados: índices de los objetos seleccionados
 def mochila_lineal(capacidad, objetos):
     n = len(objetos)
     problema = pulp.LpProblem("mochila", pulp.LpMaximize)
@@ -31,13 +31,13 @@ def mochila_lineal(capacidad, objetos):
     # obtengo y calculo valor total
 
     objetos_seleccionados = [
-        i for i in range(n)
+        objetos[i] for i in range(n)
         if pulp.value(x[i]) == 1
     ]
 
     valor_total = sum(
-        objetos[i][1]
-        for i in objetos_seleccionados
+        obj[1]
+        for obj in objetos_seleccionados
     )
 
-    return valor_total, objetos_seleccionados
+    return objetos_seleccionados, valor_total

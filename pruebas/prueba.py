@@ -6,15 +6,12 @@ import argparse
 # Agrega la carpeta principal a sys.path para poder importar los módulos
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-
 from greedy.greedy_mochila import mochila, leer_mochila
 from backtracking_fuerza_bruta.fuerza_bruta import mochila_fuerza_bruta
 from backtracking_fuerza_bruta.backtracking import mochila_backtracking
 from programacion_lineal.programacion_lineal import mochila_lineal
-from programacion_dinamica.tradicional import Item as ItemTradicional
-from programacion_dinamica.alternativo import Item as ItemAlternativo
-
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+from programacion_dinamica.tradicional import mochila_pd_tradicional
+from programacion_dinamica.alternativo import mochila_pd_alternativo
 
 class Logger(object):
     def __init__(self, filename):
@@ -29,139 +26,49 @@ class Logger(object):
         self.terminal.flush()
         self.log.flush()
 
-def medir_tiempo(algoritmo, W, objetos, repeticiones=1):
+def medir_tiempo(algoritmo, capacidad, objetos, repeticiones=1):
     inicio = time.perf_counter()
     for _ in range(repeticiones):
-        seleccionados, beneficio = algoritmo(W, objetos)
+        seleccionados, beneficio = algoritmo(capacidad, objetos)
     fin = time.perf_counter()
     tiempo_promedio = (fin - inicio) / repeticiones
     return seleccionados, beneficio, tiempo_promedio
 
-
-def probar_greedy(W, objetos):
-    print("## GREEDY")
-    seleccionados, beneficio, tiempo = medir_tiempo(
-        mochila,
-        W,
-        objetos,
-        repeticiones=100
-    )
-
+def imprimir_resultados(nombre, seleccionados, beneficio, tiempo, capacidad):
     peso_total = sum(objeto[0] for objeto in seleccionados)
+    print(f"## {nombre}")
+    print(f"- Beneficio obtenido: {beneficio}")
+    print(f"- Peso total: {peso_total}")
+    print(f"- Respeta capacidad: {peso_total <= capacidad}")
+    print(f"- Tiempo promedio: {tiempo} segundos\n")
 
-    print("- Beneficio obtenido:", beneficio)
-    print("- Peso total:", peso_total)
-    print("- Respeta capacidad:", peso_total <= W)
-    print("- Tiempo promedio:", tiempo, "segundos")
+def probar_greedy(capacidad, objetos):
+    seleccionados, beneficio, tiempo = medir_tiempo(mochila, capacidad, objetos, repeticiones=100)
+    imprimir_resultados("GREEDY", seleccionados, beneficio, tiempo, capacidad)
 
-
-def probar_backtracking(W, objetos, n):
-    print("## BACKTRACKING")
+def probar_backtracking(capacidad, objetos, n):
     reps_bt = 30 if n < 50 else 15
-    
-    seleccionados, beneficio, tiempo = medir_tiempo(
-        mochila_backtracking,
-        W,
-        objetos,
-        repeticiones=reps_bt
-    )
+    seleccionados, beneficio, tiempo = medir_tiempo(mochila_backtracking, capacidad, objetos, repeticiones=reps_bt)
+    imprimir_resultados("BACKTRACKING", seleccionados, beneficio, tiempo, capacidad)
 
-    peso_total = sum(objeto[0] for objeto in seleccionados)
-
-    print("- Beneficio obtenido:", beneficio)
-    print("- Peso total:", peso_total)
-    print("- Respeta capacidad:", peso_total <= W)
-    print("- Tiempo promedio:", tiempo, "segundos")
-
-
-def probar_fuerza_bruta(W, objetos, n):
-    print("## FUERZA BRUTA")
+def probar_fuerza_bruta(capacidad, objetos, n):
     if n <= 25:
-        seleccionados, beneficio, tiempo = medir_tiempo(
-            mochila_fuerza_bruta,
-            W,
-            objetos,
-            repeticiones=1
-        )
-
-        peso_total = sum(objeto[0] for objeto in seleccionados)
-
-        print("- Beneficio obtenido:", beneficio)
-        print("- Peso total:", peso_total)
-        print("- Respeta capacidad:", peso_total <= W)
-        print("- Tiempo promedio:", tiempo, "segundos")
+        seleccionados, beneficio, tiempo = medir_tiempo(mochila_fuerza_bruta, capacidad, objetos, repeticiones=1)
+        imprimir_resultados("FUERZA BRUTA", seleccionados, beneficio, tiempo, capacidad)
     else:
-        print(f"Omitido: {n} muchos objetos para Fbruta")
+        print(f"## FUERZA BRUTA\nOmitido: {n} muchos objetos para Fbruta\n")
 
+def probar_lineal(capacidad, objetos):
+    seleccionados, beneficio, tiempo = medir_tiempo(mochila_lineal, capacidad, objetos, repeticiones=10)
+    imprimir_resultados("PROGRAMACIÓN LINEAL", seleccionados, beneficio, tiempo, capacidad)
 
-def wrapper_lineal(W, objetos):
-    beneficio, indices = mochila_lineal(W, objetos)
-    seleccionados = [objetos[i] for i in indices]
-    return seleccionados, beneficio
+def probar_pd_tradicional(capacidad, objetos):
+    seleccionados, beneficio, tiempo = medir_tiempo(mochila_pd_tradicional, capacidad, objetos, repeticiones=10)
+    imprimir_resultados("PROGRAMACION DINAMICA TRADICIONAL", seleccionados, beneficio, tiempo, capacidad)
 
-
-def probar_lineal(W, objetos):
-    print("## PROGRAMACIÓN LINEAL")
-    seleccionados, beneficio, tiempo = medir_tiempo(
-        wrapper_lineal, W, objetos, repeticiones=10
-    )
-    peso_total = sum(objeto[0] for objeto in seleccionados)
-    print("- Beneficio obtenido:", beneficio)
-    print("- Peso total:", peso_total)
-    print("- Respeta capacidad:", peso_total <= W)
-    print("- Tiempo promedio:", tiempo, "segundos")
-
-
-def wrapper_pd_tradicional(W, objetos):
-    items = [ItemTradicional(p, b) for p, b in objetos]
-    solutions = [0] * (W + 1)
-    
-    for item in items:
-        for w in range(W, item.weight - 1, -1):
-            solutions[w] = max(solutions[w], solutions[w - item.weight] + item.benefit)
-            
-    return [], solutions[W]
-
-
-def probar_pd_tradicional(W, objetos):
-    print("## PROGRAMACION DINAMICA TRADICIONAL")
-    seleccionados, beneficio, tiempo = medir_tiempo(
-        wrapper_pd_tradicional, W, objetos, repeticiones=10
-    )
-    # Como DP Tradicional no devuelve los objetos en esta implementación, omitimos el peso
-    print("- Beneficio obtenido:", beneficio)
-    print("- Tiempo promedio:", tiempo, "segundos")
-
-
-def wrapper_pd_alternativo(W, objetos):
-    items = [ItemAlternativo(p, b) for p, b in objetos]
-    max_benefit = sum(b for p, b in objetos)
-    
-    solutions = [float('inf')] * (max_benefit + 1)
-    solutions[0] = 0
-    
-    for item in items:
-        for v in range(max_benefit, -1, -1):
-            solutions[v] = min(solutions[v], solutions[max(0, v - item.benefit)] + item.weight)
-            
-    result = 0
-    for v in range(max_benefit, -1, -1):
-        if solutions[v] <= W:
-            result = v
-            break
-            
-    return [], result
-
-
-def probar_pd_alternativo(W, objetos):
-    print("## PROGRAMACION DINAMICA ALTERNATIVO")
-    seleccionados, beneficio, tiempo = medir_tiempo(
-        wrapper_pd_alternativo, W, objetos, repeticiones=10
-    )
-    # Como DP Alternativo no devuelve los objetos en esta implementación, omitimos el peso
-    print("- Beneficio obtenido:", beneficio)
-    print("- Tiempo promedio:", tiempo, "segundos")
-
+def probar_pd_alternativo(capacidad, objetos):
+    seleccionados, beneficio, tiempo = medir_tiempo(mochila_pd_alternativo, capacidad, objetos, repeticiones=10)
+    imprimir_resultados("PROGRAMACION DINAMICA ALTERNATIVO", seleccionados, beneficio, tiempo, capacidad)
 
 def main():
     parser = argparse.ArgumentParser(description="Ejecuta la prueba de la mochila para un archivo.")
@@ -177,27 +84,26 @@ def main():
         os.makedirs(dir_resultados, exist_ok=True)
         archivo_resultado = os.path.join(dir_resultados, "resultado.md")
         sys.stdout = Logger(archivo_resultado)
-        print(f"# PRUEBA: {args.nombre}")
+        print(f"# PRUEBA: {args.nombre}\n")
 
     try:
-        W, objetos = leer_mochila(nombre_archivo)
+        capacidad, objetos = leer_mochila(nombre_archivo)
     except FileNotFoundError:
         print(f"Error: No se encontró el archivo '{nombre_archivo}'")
         sys.exit(1)
         
     n = len(objetos)
 
-    print("- Archivo: ", nombre_archivo)
-    print("- Cantidad de objetos: ", n)
-    print("- Capacidad: ", W)
+    print(f"- Archivo: {nombre_archivo}")
+    print(f"- Cantidad de objetos: {n}")
+    print(f"- Capacidad: {capacidad}\n")
 
-    probar_greedy(W, objetos)
-    probar_pd_tradicional(W, objetos)
-    probar_pd_alternativo(W, objetos)
-    probar_lineal(W, objetos)
-    probar_backtracking(W, objetos, n)
-    probar_fuerza_bruta(W, objetos, n)
-
+    probar_greedy(capacidad, objetos)
+    probar_pd_tradicional(capacidad, objetos)
+    probar_pd_alternativo(capacidad, objetos)
+    probar_lineal(capacidad, objetos)
+    probar_backtracking(capacidad, objetos, n)
+    probar_fuerza_bruta(capacidad, objetos, n)
 
 if __name__ == "__main__":
     main()

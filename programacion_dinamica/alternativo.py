@@ -1,53 +1,42 @@
-import sys
-from typing import List, Tuple
-from dataclasses import dataclass
-
-@dataclass
-class Item:
-    weight: int
-    benefit: int
-
-def parse_filename(filename: str) -> Tuple[int, List[Item], int]:
-    with open(filename, 'r') as f:
-        lines = f.read().splitlines()
+def mochila_pd_alternativo(capacidad, objetos):
+    n = len(objetos)
+    if n == 0:
+        return [], 0
         
-    if not lines:
-        return 0, [], 0
-        
-    capacity = int(lines[0])
-    items = []
-    max_benefit = 0
-    for line in lines[1:]:
-        if line.strip():
-            w, b = map(int, line.split(','))
-            items.append(Item(w, b))
-            max_benefit += b
-            
-    return capacity, items, max_benefit
-
-"""
-Planteo alternativo: minimizar el peso para un beneficio fijo
-"""
-def solve(filename: str) -> int:
-    capacity, items, max_benefit = parse_filename(filename)
-    if not items:
-        return 0
-        
-    solutions = [float('inf')] * (max_benefit + 1)
-    solutions[0] = 0
+    max_benefit = sum(obj[1] for obj in objetos)
     
-    for item in items:
-        for v in range(max_benefit, -1, -1):
-            solutions[v] = min(solutions[v], solutions[max(0, v - item.benefit)] + item.weight)
+    dp = [[float('inf')] * (max_benefit + 1) for _ in range(n + 1)]
+    for i in range(n + 1):
+        dp[i][0] = 0
+        
+    for i in range(1, n + 1):
+        peso = objetos[i-1][0]
+        beneficio = objetos[i-1][1]
+        for v in range(max_benefit + 1):
+            dp[i][v] = min(dp[i-1][v], dp[i-1][max(0, v - beneficio)] + peso)
             
-    result = 0
+    mejor_v = 0
     for v in range(max_benefit, -1, -1):
-        if solutions[v] <= capacity:
-            result = v
+        if dp[n][v] <= capacidad:
+            mejor_v = v
             break
             
-    return result
-
-if __name__ == '__main__':
-    if len(sys.argv) > 1:
-        print(solve(sys.argv[1]))
+    seleccionados = []
+    v = mejor_v
+    for i in range(n, 0, -1):
+        if v <= 0:
+            break
+            
+        peso = objetos[i-1][0]
+        beneficio = objetos[i-1][1]
+        
+        # Si el valor actual viene de NO incluir el objeto i-1
+        if dp[i][v] == dp[i-1][v]:
+            continue
+        else:
+            # Si viene de incluirlo
+            seleccionados.append(objetos[i-1])
+            v = max(0, v - beneficio)
+            
+    seleccionados.reverse()
+    return seleccionados, mejor_v
