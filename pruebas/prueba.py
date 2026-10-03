@@ -1,6 +1,7 @@
 import sys
 import os
 import time
+import argparse
 
 # Agrega la carpeta principal a sys.path para poder importar los módulos
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -13,6 +14,20 @@ from programacion_lineal.programacion_lineal import mochila_lineal
 from programacion_dinamica.tradicional import Item as ItemTradicional
 from programacion_dinamica.alternativo import Item as ItemAlternativo
 
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+class Logger(object):
+    def __init__(self, filename):
+        self.terminal = sys.stdout
+        self.log = open(filename, "w", encoding="utf-8")
+
+    def write(self, message):
+        self.terminal.write(message)
+        self.log.write(message)
+
+    def flush(self):
+        self.terminal.flush()
+        self.log.flush()
 
 def medir_tiempo(algoritmo, W, objetos, repeticiones=1):
     inicio = time.perf_counter()
@@ -24,7 +39,7 @@ def medir_tiempo(algoritmo, W, objetos, repeticiones=1):
 
 
 def probar_greedy(W, objetos):
-    print("\n--- GREEDY ---")
+    print("## GREEDY")
     seleccionados, beneficio, tiempo = medir_tiempo(
         mochila,
         W,
@@ -34,14 +49,14 @@ def probar_greedy(W, objetos):
 
     peso_total = sum(objeto[0] for objeto in seleccionados)
 
-    print("Beneficio obtenido:", beneficio)
-    print("Peso total:", peso_total)
-    print("Respeta capacidad:", peso_total <= W)
-    print("Tiempo promedio:", tiempo, "segundos")
+    print("- Beneficio obtenido:", beneficio)
+    print("- Peso total:", peso_total)
+    print("- Respeta capacidad:", peso_total <= W)
+    print("- Tiempo promedio:", tiempo, "segundos")
 
 
 def probar_backtracking(W, objetos, n):
-    print("\n--- BACKTRACKING ---")
+    print("## BACKTRACKING")
     reps_bt = 30 if n < 50 else 15
     
     seleccionados, beneficio, tiempo = medir_tiempo(
@@ -53,14 +68,14 @@ def probar_backtracking(W, objetos, n):
 
     peso_total = sum(objeto[0] for objeto in seleccionados)
 
-    print("Beneficio obtenido:", beneficio)
-    print("Peso total:", peso_total)
-    print("Respeta capacidad:", peso_total <= W)
-    print("Tiempo promedio:", tiempo, "segundos")
+    print("- Beneficio obtenido:", beneficio)
+    print("- Peso total:", peso_total)
+    print("- Respeta capacidad:", peso_total <= W)
+    print("- Tiempo promedio:", tiempo, "segundos")
 
 
 def probar_fuerza_bruta(W, objetos, n):
-    print("\n--- FUERZA BRUTA ---")
+    print("## FUERZA BRUTA")
     if n <= 25:
         seleccionados, beneficio, tiempo = medir_tiempo(
             mochila_fuerza_bruta,
@@ -71,10 +86,10 @@ def probar_fuerza_bruta(W, objetos, n):
 
         peso_total = sum(objeto[0] for objeto in seleccionados)
 
-        print("Beneficio obtenido:", beneficio)
-        print("Peso total:", peso_total)
-        print("Respeta capacidad:", peso_total <= W)
-        print("Tiempo promedio:", tiempo, "segundos")
+        print("- Beneficio obtenido:", beneficio)
+        print("- Peso total:", peso_total)
+        print("- Respeta capacidad:", peso_total <= W)
+        print("- Tiempo promedio:", tiempo, "segundos")
     else:
         print(f"Omitido: {n} muchos objetos para Fbruta")
 
@@ -86,15 +101,15 @@ def wrapper_lineal(W, objetos):
 
 
 def probar_lineal(W, objetos):
-    print("\n--- PROGRAMACIÓN LINEAL ---")
+    print("## PROGRAMACIÓN LINEAL")
     seleccionados, beneficio, tiempo = medir_tiempo(
         wrapper_lineal, W, objetos, repeticiones=10
     )
     peso_total = sum(objeto[0] for objeto in seleccionados)
-    print("Beneficio obtenido:", beneficio)
-    print("Peso total:", peso_total)
-    print("Respeta capacidad:", peso_total <= W)
-    print("Tiempo promedio:", tiempo, "segundos")
+    print("- Beneficio obtenido:", beneficio)
+    print("- Peso total:", peso_total)
+    print("- Respeta capacidad:", peso_total <= W)
+    print("- Tiempo promedio:", tiempo, "segundos")
 
 
 def wrapper_pd_tradicional(W, objetos):
@@ -109,13 +124,13 @@ def wrapper_pd_tradicional(W, objetos):
 
 
 def probar_pd_tradicional(W, objetos):
-    print("\n--- PD TRADICIONAL ---")
+    print("## PROGRAMACION DINAMICA TRADICIONAL")
     seleccionados, beneficio, tiempo = medir_tiempo(
         wrapper_pd_tradicional, W, objetos, repeticiones=10
     )
     # Como DP Tradicional no devuelve los objetos en esta implementación, omitimos el peso
-    print("Beneficio obtenido:", beneficio)
-    print("Tiempo promedio:", tiempo, "segundos")
+    print("- Beneficio obtenido:", beneficio)
+    print("- Tiempo promedio:", tiempo, "segundos")
 
 
 def wrapper_pd_alternativo(W, objetos):
@@ -139,21 +154,30 @@ def wrapper_pd_alternativo(W, objetos):
 
 
 def probar_pd_alternativo(W, objetos):
-    print("\n--- PD ALTERNATIVO ---")
+    print("## PROGRAMACION DINAMICA ALTERNATIVO")
     seleccionados, beneficio, tiempo = medir_tiempo(
         wrapper_pd_alternativo, W, objetos, repeticiones=10
     )
     # Como DP Alternativo no devuelve los objetos en esta implementación, omitimos el peso
-    print("Beneficio obtenido:", beneficio)
-    print("Tiempo promedio:", tiempo, "segundos")
+    print("- Beneficio obtenido:", beneficio)
+    print("- Tiempo promedio:", tiempo, "segundos")
 
 
 def main():
-    if len(sys.argv) < 2:
-        print("Uso: python prueba.py <ruta_al_archivo>")
-        sys.exit(1)
+    parser = argparse.ArgumentParser(description="Ejecuta la prueba de la mochila para un archivo.")
+    parser.add_argument("--archivo", type=str, help="Ruta al archivo de prueba.")
+    parser.add_argument("--nombre", type=str, help="Nombre de la prueba para guardar los resultados.")
+    args = parser.parse_args()
         
-    nombre_archivo = sys.argv[1]
+    nombre_archivo = args.archivo
+
+    if args.nombre:
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        dir_resultados = os.path.join(script_dir, "resultados", args.nombre)
+        os.makedirs(dir_resultados, exist_ok=True)
+        archivo_resultado = os.path.join(dir_resultados, "resultado.md")
+        sys.stdout = Logger(archivo_resultado)
+        print(f"# PRUEBA: {args.nombre}")
 
     try:
         W, objetos = leer_mochila(nombre_archivo)
@@ -163,15 +187,14 @@ def main():
         
     n = len(objetos)
 
-    print("\n" + "="*50)
-    print("Archivo: ", nombre_archivo)
-    print("Cantidad de objetos: ", n)
-    print("Capacidad: ", W)
-    
+    print("- Archivo: ", nombre_archivo)
+    print("- Cantidad de objetos: ", n)
+    print("- Capacidad: ", W)
+
     probar_greedy(W, objetos)
     probar_pd_tradicional(W, objetos)
     probar_pd_alternativo(W, objetos)
-    probar_lineal(W, objetos) # Está fallando
+    probar_lineal(W, objetos)
     probar_backtracking(W, objetos, n)
     probar_fuerza_bruta(W, objetos, n)
 
