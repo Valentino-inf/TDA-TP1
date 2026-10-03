@@ -15,10 +15,10 @@ Definimos las siguientes variables para el análisis:
 
 ### Análisis:
 1. **Lectura y parseo del archivo:** Iterar sobre las líneas del archivo para construir la lista de elementos toma un tiempo de $\mathcal{O}(N)$.
-2. **Inicialización del arreglo:** Se crea un arreglo de tamaño $W+1$ que toma un tiempo de $\mathcal{O}(W)$.
+2. **Inicialización de la matriz:** Se crea una matriz de tamaño $(N+1) \times (W+1)$ que toma un tiempo de $\mathcal{O}(N \times W)$.
 3. **Lógica Principal (Programación Dinámica):**
    * Existe un bucle externo que itera sobre los $N$ elementos.
-   * Por cada elemento, existe un bucle interno que itera desde la capacidad máxima $W$ hasta el peso del elemento, lo que en el peor de los casos significa iterar $W$ veces.
+   * Por cada elemento, existe un bucle interno que itera sobre las capacidades desde $0$ hasta la capacidad máxima $W$, lo que significa iterar $W+1$ veces.
    * Las operaciones dentro del bucle interno (comparación, suma y asignación) se ejecutan en tiempo constante $\mathcal{O}(1)$.
    * Por lo tanto, el doble bucle toma un tiempo de $\mathcal{O}(N \times W)$.
 
@@ -31,10 +31,10 @@ Definimos las siguientes variables para el análisis:
 
 ### Análisis:
 1. **Lectura y parseo del archivo:** Al igual que en el algoritmo anterior, iterar sobre las líneas para construir los elementos y calcular la suma total de beneficios ($V$) toma $\mathcal{O}(N)$.
-2. **Inicialización del arreglo:** Se crea un arreglo de tamaño $V+1$ que toma un tiempo de $\mathcal{O}(V)$.
+2. **Inicialización de la matriz:** Se crea una matriz de tamaño $(N+1) \times (V+1)$ que toma un tiempo de $\mathcal{O}(N \times V)$.
 3. **Lógica Principal (Programación Dinámica):**
    * El bucle externo itera sobre los $N$ elementos.
-   * El bucle interno itera sobre todos los posibles beneficios, desde $V$ hasta 0 (es decir, $V$ iteraciones por cada elemento).
+   * El bucle interno itera sobre todos los posibles beneficios, desde $0$ hasta $V$ (es decir, $V+1$ iteraciones por cada elemento).
    * Las operaciones dentro de los bucles son de acceso, suma, cálculo de máximo y asignación en tiempo constante $\mathcal{O}(1)$.
    * Este bloque toma un tiempo de $\mathcal{O}(N \times V)$.
 4. **Búsqueda del resultado óptimo:** Una vez llenada la tabla, se realiza un último bucle de a lo sumo $V$ iteraciones para encontrar el máximo beneficio que cumple con la capacidad de la mochila, tomando $\mathcal{O}(V)$.
