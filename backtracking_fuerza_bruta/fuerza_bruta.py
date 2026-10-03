@@ -31,14 +31,3 @@ def mochila_fuerza_bruta(capacidad, objetos, indice=0):
         return [objetos[indice]] + objetos_incluyendo, beneficio_incluyendo
     else:
         return objetos_excluyendo, beneficio_excluyendo
-
-
-nombre_archivo = "mochila1000.txt"
-
-capacidad_total, lista_objetos = leer_mochila("mochila1000.txt")
-
-objetos_prueba = lista_objetos[:20]
-
-capacidad_prueba = 1000
-combinacion, maximo_beneficio = mochila_fuerza_bruta(capacidad_prueba, objetos_prueba)
-print(f"beneficio: {maximo_beneficio}")
