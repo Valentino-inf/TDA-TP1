@@ -1,11 +1,14 @@
 import time
+from pathlib import Path
 
 from greedy.greedy_mochila import mochila, leer_mochila
 from backtracking_fuerza_bruta.fuerza_bruta import mochila_fuerza_bruta
 from backtracking_fuerza_bruta.backtracking import mochila_backtracking
 from programacion_lineal.programacion_lineal import mochila_lineal
-from programacion_dinamica.tradicional import Item as ItemTradicional
-from programacion_dinamica.alternativo import Item as ItemAlternativo
+from programacion_dinamica.tradicional import mochila_pd_tradicional
+from programacion_dinamica.alternativo import mochila_pd_alternativo
+
+DIRECTORIO_PRUEBAS = Path(__file__).parent
 
 ARCHIVOS = [
     "mochila10.txt",
@@ -103,52 +106,54 @@ def probar_lineal(W, objetos):
     print("Tiempo promedio:", tiempo, "segundos")
 
 
-def wrapper_pd_tradicional(W, objetos):
-    items = [ItemTradicional(p, b) for p, b in objetos]
-    solutions = [0] * (W + 1)
-    
-    for item in items:
-        for w in range(W, item.weight - 1, -1):
-            solutions[w] = max(solutions[w], solutions[w - item.weight] + item.benefit)
-            
-    return [], solutions[W]
+# def wrapper_pd_tradicional(W, objetos):
+#     items = [ItemTradicional(p, b) for p, b in objetos]
+#     solutions = [0] * (W + 1)
+#
+#     for item in items:
+#         for w in range(W, item.weight - 1, -1):
+#             solutions[w] = max(
+#                 solutions[w],
+#                 solutions[w - item.weight] + item.benefit
+#             )
+#
+#     return [], solutions[W]
 
 
 def probar_pd_tradicional(W, objetos):
     print("\n--- PD TRADICIONAL ---")
-    seleccionados, beneficio, tiempo = medir_tiempo(
-        wrapper_pd_tradicional, W, objetos, repeticiones=10
-    )
+    seleccionados, beneficio, tiempo = medir_tiempo(mochila_pd_tradicional, W, objetos, repeticiones=10)
     # Como DP Tradicional no devuelve los objetos en esta implementación, omitimos el peso
     print("Beneficio obtenido:", beneficio)
     print("Tiempo promedio:", tiempo, "segundos")
 
 
-def wrapper_pd_alternativo(W, objetos):
-    items = [ItemAlternativo(p, b) for p, b in objetos]
-    max_benefit = sum(b for p, b in objetos)
-    
-    solutions = [float('inf')] * (max_benefit + 1)
-    solutions[0] = 0
-    
-    for item in items:
-        for v in range(max_benefit, -1, -1):
-            solutions[v] = min(solutions[v], solutions[max(0, v - item.benefit)] + item.weight)
-            
-    result = 0
-    for v in range(max_benefit, -1, -1):
-        if solutions[v] <= W:
-            result = v
-            break
-            
-    return [], result
+# def wrapper_pd_alternativo(W, objetos):
+#     items = [ItemAlternativo(p, b) for p, b in objetos]
+#     max_benefit = sum(b for p, b in objetos)
+#
+#     solutions = [float('inf')] * (max_benefit + 1)
+#     solutions[0] = 0
+#
+#     for item in items:
+#         for v in range(max_benefit, -1, -1):
+#             solutions[v] = min(
+#                 solutions[v],
+#                 solutions[max(0, v - item.benefit)] + item.weight
+#             )
+#
+#     result = 0
+#     for v in range(max_benefit, -1, -1):
+#         if solutions[v] <= W:
+#             result = v
+#             break
+#
+#     return [], result
 
 
 def probar_pd_alternativo(W, objetos):
     print("\n--- PD ALTERNATIVO ---")
-    seleccionados, beneficio, tiempo = medir_tiempo(
-        wrapper_pd_alternativo, W, objetos, repeticiones=10
-    )
+    seleccionados, beneficio, tiempo = medir_tiempo(mochila_pd_alternativo, W, objetos, repeticiones=10)
     # Como DP Alternativo no devuelve los objetos en esta implementación, omitimos el peso
     print("Beneficio obtenido:", beneficio)
     print("Tiempo promedio:", tiempo, "segundos")
@@ -157,7 +162,8 @@ def probar_pd_alternativo(W, objetos):
 def main():
     for nombre_archivo in ARCHIVOS:
 
-        W, objetos = leer_mochila(nombre_archivo)
+        ruta_archivo = DIRECTORIO_PRUEBAS / nombre_archivo
+        W, objetos = leer_mochila(ruta_archivo)
         n = len(objetos)
 
         print("\n" + "="*50)
