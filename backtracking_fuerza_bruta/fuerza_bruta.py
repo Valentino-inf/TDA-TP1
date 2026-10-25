@@ -1,3 +1,5 @@
+import itertools
+
 def leer_mochila(nombre_archivo):
     objetos = []
 
@@ -10,24 +12,20 @@ def leer_mochila(nombre_archivo):
 
     return W, objetos
 
-def mochila_fuerza_bruta(capacidad, objetos, indice=0):
-    if indice == len(objetos) or capacidad == 0:
-        return [], 0
-        
-    peso_actual = objetos[indice][0]
-    beneficio_actual = objetos[indice][1]
+
+def mochila_fuerza_bruta(capacidad, objetos):
+    mejor_beneficio = 0
+    mejor_combinacion = []
+    n = len(objetos)
     
-    if peso_actual > capacidad:
-        return mochila_fuerza_bruta(capacidad, objetos, indice + 1)
-        
-    objetos_incluyendo, beneficio_sub_incluyendo = mochila_fuerza_bruta(
-        capacidad - peso_actual, objetos, indice + 1
-    )
-    beneficio_incluyendo = beneficio_actual + beneficio_sub_incluyendo
-    
-    objetos_excluyendo, beneficio_excluyendo = mochila_fuerza_bruta(capacidad, objetos, indice + 1)
-    
-    if beneficio_incluyendo > beneficio_excluyendo:
-        return [objetos[indice]] + objetos_incluyendo, beneficio_incluyendo
-    else:
-        return objetos_excluyendo, beneficio_excluyendo
+    for r in range(n + 1):
+        for combinacion in itertools.combinations(objetos, r):
+            peso_total = sum(item[0] for item in combinacion)
+            
+            if peso_total <= capacidad:
+                beneficio_total = sum(item[1] for item in combinacion)
+                if beneficio_total > mejor_beneficio:
+                    mejor_beneficio = beneficio_total
+                    mejor_combinacion = list(combinacion)
+                    
+    return mejor_combinacion, mejor_beneficio

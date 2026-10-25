@@ -10,15 +10,14 @@ fi
 
 echo "Generando $ZIP_NAME..."
 
-# Eliminar zip anterior si existe
 if [ -f "$ZIP_NAME" ]; then
     rm "$ZIP_NAME"
 fi
 
-# Generar el zip excluyendo archivos y carpetas que no son código fuente ni el informe
 zip -r "$ZIP_NAME" . \
     -x "*.git*" \
-    -x "*.venv*" \
+    -x "venv/*" \
+    -x ".venv/*" \
     -x "*.idea*" \
     -x "*__pycache__*" \
     -x "*.gitignore" \
