@@ -558,7 +558,15 @@ Funcion PD_Tradicional(capacidad, objetos):
             Sino:
                 dp[i][w] = dp[i-1][w]
 
-    Retornar dp[n][capacidad]
+    # Reconstruccion de la solucion
+    seleccionados = lista vacia
+    w = capacidad
+    Para i desde n hasta 1:
+        Si dp[i][w] != dp[i-1][w]:      # el objeto i-1 fue incluido
+            agregar objetos[i-1] a seleccionados
+            w = w - peso_i
+
+    Retornar seleccionados, dp[n][capacidad]
 \end{lstlisting}
 
 \subsubsection{Seguimiento}
@@ -573,11 +581,13 @@ Ejemplo reducido: Capacidad $W = 5$. Objetos: \texttt{O1(peso:3, ben:4)}, \textt
         $i=2$ ($O_2$: p=2, b=3) & 0 & 0 & \textbf{3} & 4 & 4 & \textbf{7} \\ \bottomrule
     \end{tabular}
     \caption{Llenado de la matriz DP para el planteo tradicional.}
+    \label{tab:pd_trad_seguimiento}
 \end{table}
+El beneficio óptimo es $dp[2][5] = 7$. Para reconstruir la solución se recorre la matriz de abajo hacia arriba partiendo de $w = 5$: $dp[2][5] = 7 \neq dp[1][5] = 4$, por lo que $O_2$ fue incluido y $w$ pasa a ser $3$; $dp[1][3] = 4 \neq dp[0][3] = 0$, por lo que $O_1$ también fue incluido. La solución es $\{O_1, O_2\}$ con peso $5$ y beneficio $7$.
 
 \subsubsection{Complejidad temporal y espacial}
 \begin{itemize}
-    \item \textbf{Temporal:} $\mathcal{O}(n \cdot W)$. La inicialización de la matriz toma $\mathcal{O}(n \cdot W)$. El algoritmo consta de un doble bucle, donde el externo itera sobre los $n$ elementos y el interno sobre las capacidades desde $0$ hasta $W$. Como las operaciones dentro del bucle interno toman tiempo $\mathcal{O}(1)$, la complejidad temporal queda determinada por el llenado de la matriz, siendo $\mathcal{O}(n \cdot W)$.
+    \item \textbf{Temporal:} $\mathcal{O}(n \cdot W)$. La inicialización de la matriz toma $\mathcal{O}(n \cdot W)$. El algoritmo consta de un doble bucle, donde el externo itera sobre los $n$ elementos y el interno sobre las capacidades desde $0$ hasta $W$. Como las operaciones dentro del bucle interno toman tiempo $\mathcal{O}(1)$, la complejidad temporal queda determinada por el llenado de la matriz, siendo $\mathcal{O}(n \cdot W)$. La reconstrucción de la solución recorre una vez las $n$ filas, lo que cuesta $\mathcal{O}(n)$ y no altera el orden.
     \item \textbf{Espacial:} $\mathcal{O}(n \cdot W)$. Se requiere alojar en memoria una matriz completa de tamaño $(n+1) \times (W+1)$ para almacenar los estados de la programación dinámica.
 \end{itemize}
 
@@ -586,15 +596,17 @@ Ejemplo reducido: Capacidad $W = 5$. Objetos: \texttt{O1(peso:3, ben:4)}, \textt
 \subsection{Planteo alternativo (minimizar peso para beneficio fijo)}
 
 \subsubsection{Supuestos}
-\textbf{Supuestos:} Los beneficios $v_i$ son enteros positivos. Definimos $V = \sum v_i$ como el beneficio máximo alcanzable si se incluyeran todos los objetos.
+\textbf{Supuestos:} Los pesos $w_i$ y los beneficios $v_i$ son enteros positivos. Definimos $V = \sum v_i$ como el beneficio que se obtendría incluyendo todos los objetos; es una cota superior del beneficio alcanzable y determina la cantidad de columnas de la matriz. El valor $\infty$ representa un beneficio inalcanzable con los objetos considerados.
 
-\textbf{Ecuación de recurrencia:} Definimos $OPT(i, v)$ como el \textit{peso mínimo necesario} usando un subconjunto de los objetos del $1$ al $i$ para obtener exactamente un beneficio de $v$.
+\textbf{Ecuación de recurrencia:} Definimos $OPT(i, v)$ como el \textit{peso mínimo} de un subconjunto de los objetos del $1$ al $i$ cuyo beneficio es \textbf{al menos} $v$.
 \begin{align*}
     OPT(i, 0) &= 0 \quad \forall i \in \{0, \dots, n\} \\
     OPT(0, v) &= \infty \quad \forall v \in \{1, \dots, V\} \\
-    OPT(i, v) &= OPT(i-1, v) \quad \text{si } v_i > v \\
-    OPT(i, v) &= \min(OPT(i-1, v), OPT(i-1, v-v_i) + w_i) \quad \text{si } v_i \le v
+    OPT(i, v) &= \min\big(OPT(i-1, v),\; OPT(i-1, \max(0, v - v_i)) + w_i\big) \quad \forall v \in \{1, \dots, V\}
 \end{align*}
+El primer término corresponde a no incluir el objeto $i$. El segundo lo incluye: si $v_i < v$, todavía faltan $v - v_i$ unidades de beneficio que deben cubrir los objetos anteriores; si $v_i \ge v$, el objeto por sí solo cubre el beneficio pedido y el resto del subconjunto puede ser vacío (columna $0$, de peso $0$). De ahí el $\max(0, v - v_i)$. Con esta definición la fila final es no decreciente en $v$, y la respuesta es el mayor $v$ tal que $OPT(n, v) \le W$: ese es el máximo beneficio que entra en la mochila.
+
+Esta formulación difiere de la que exige obtener \textit{exactamente} un beneficio $v$ (en la que el objeto $i$ solo se considera si $v_i \le v$) únicamente en el contenido de las celdas; el beneficio óptimo que se obtiene es el mismo, pero elegimos describir la variante ``al menos $v$'' porque es la que implementa el código entregado.
 
 \subsubsection{Diseño y pseudocódigo}
 \textbf{Estructuras de datos utilizadas:}
@@ -607,6 +619,8 @@ Ejemplo reducido: Capacidad $W = 5$. Objetos: \texttt{O1(peso:3, ben:4)}, \textt
 \begin{lstlisting}[language=Python]
 Funcion PD_Alternativo(capacidad, objetos):
     n = cantidad_objetos
+    Si n == 0:
+        Retornar lista vacia, 0
     V = suma de todos los beneficios de los objetos
     dp = matriz de (n+1) x (V+1) inicializada en infinito
 
@@ -615,18 +629,28 @@ Funcion PD_Alternativo(capacidad, objetos):
 
     Para i desde 1 hasta n:
         peso_i, ben_i = objetos[i-1]
-        Para v desde 1 hasta V:
-            Si ben_i <= v:
-                dp[i][v] = min(dp[i-1][v], dp[i-1][v - ben_i] + peso_i)
-            Sino:
-                dp[i][v] = dp[i-1][v]
+        Para v desde 0 hasta V:
+            dp[i][v] = min(dp[i-1][v], dp[i-1][max(0, v - ben_i)] + peso_i)
 
-    max_ben = 0
-    Para v desde 0 hasta V:
+    # Mayor beneficio cuyo peso minimo entra en la mochila
+    mejor_v = 0
+    Para v desde V hasta 0 (descendente):
         Si dp[n][v] <= capacidad:
-            max_ben = v
+            mejor_v = v
+            Cortar
 
-    Retornar max_ben
+    # Reconstruccion de la solucion
+    seleccionados = lista vacia
+    v = mejor_v
+    Para i desde n hasta 1:
+        Si v <= 0:
+            Cortar
+        peso_i, ben_i = objetos[i-1]
+        Si dp[i][v] != dp[i-1][v]:      # el objeto i-1 fue incluido
+            agregar objetos[i-1] a seleccionados
+            v = max(0, v - ben_i)
+
+    Retornar seleccionados, mejor_v
 \end{lstlisting}
 
 \subsubsection{Seguimiento}
@@ -637,92 +661,109 @@ Ejemplo reducido: Capacidad $W = 5$. Objetos: \texttt{O1(peso:3, ben:4)}, \textt
         \toprule
         \textbf{Objeto \textbackslash \ Beneficio ($v$)} & \textbf{0} & \textbf{1} & \textbf{2} & \textbf{3} & \textbf{4} & \textbf{5} & \textbf{6} & \textbf{7} \\ \midrule
         $i=0$ (Sin obj.) & 0 & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ \\
-        $i=1$ ($O_1$: p=3, b=4) & 0 & $\infty$ & $\infty$ & $\infty$ & \textbf{3} & $\infty$ & $\infty$ & $\infty$ \\
-        $i=2$ ($O_2$: p=2, b=3) & 0 & $\infty$ & $\infty$ & \textbf{2} & 3 & $\infty$ & $\infty$ & \textbf{5} \\ \bottomrule
+        $i=1$ ($O_1$: p=3, b=4) & 0 & 3 & 3 & 3 & \textbf{3} & $\infty$ & $\infty$ & $\infty$ \\
+        $i=2$ ($O_2$: p=2, b=3) & 0 & 2 & 2 & \textbf{2} & 3 & 5 & 5 & \textbf{5} \\ \bottomrule
     \end{tabular}
-    \caption{Llenado de matriz para minimizar el peso según un beneficio fijo.}
+    \caption{Llenado de la matriz DP para el planteo alternativo: peso mínimo para obtener un beneficio de al menos $v$.}
+    \label{tab:pd_alt_seguimiento}
 \end{table}
-Los beneficios posibles (peso $\ne \infty$) son $0$ (peso $0$), $3$ (peso $2$), $4$ (peso $3$) y $7$ (peso $5$). Al iterar por todos los $v$ de la última fila, los que tienen peso $\le 5$ (capacidad de la mochila) son todos ellos. Se elige el de mayor beneficio $v$, por lo que el resultado es $7$.
+En la fila $i=1$, con $O_1$ solo se puede alcanzar beneficio $4$ pagando peso $3$, y ese mismo peso cubre cualquier beneficio menor ($v \le 4$); los beneficios $5$ a $7$ son inalcanzables. En la fila $i=2$, para $v \le 3$ alcanza con $O_2$ (peso $2$); para $v = 4$ conviene $O_1$ solo (peso $3$) antes que $O_1 + O_2$ (peso $5$); y para $v \ge 5$ hacen falta ambos objetos (peso $5$).
+
+La última fila es no decreciente, por lo que se la recorre desde $v = 7$ hacia abajo y se corta en el primer valor cuyo peso no supera la capacidad: $dp[2][7] = 5 \le 5$, de modo que el resultado es $7$. Para reconstruir la solución: $dp[2][7] = 5 \neq dp[1][7] = \infty$, así que $O_2$ fue incluido y $v$ pasa a ser $\max(0, 7 - 3) = 4$; $dp[1][4] = 3 \neq dp[0][4] = \infty$, así que $O_1$ también fue incluido. La solución es $\{O_1, O_2\}$ con peso $5$ y beneficio $7$, la misma que obtiene el planteo tradicional (Tabla~\ref{tab:pd_trad_seguimiento}).
 
 \subsubsection{Complejidad temporal y espacial}
 \begin{itemize}
-    \item \textbf{Temporal:} $\mathcal{O}(n \cdot V)$. El cálculo del beneficio total $V$ toma tiempo $\mathcal{O}(n)$. Luego se construye la matriz con dimensiones $(n+1) \times (V+1)$. El llenado de la matriz consta de dos bucles anidados que realizan operaciones en tiempo $\mathcal{O}(1)$, por lo que demora $\mathcal{O}(n \cdot V)$. Por último, buscar en la última fila de tamaño $V+1$ cuesta $\mathcal{O}(V)$. Por lo tanto, el tiempo total está dominado por el cálculo de la matriz y equivale a $\mathcal{O}(n \cdot V)$.
+    \item \textbf{Temporal:} $\mathcal{O}(n \cdot V)$. El cálculo del beneficio total $V$ toma tiempo $\mathcal{O}(n)$. Luego se construye la matriz con dimensiones $(n+1) \times (V+1)$. El llenado de la matriz consta de dos bucles anidados que realizan operaciones en tiempo $\mathcal{O}(1)$, por lo que demora $\mathcal{O}(n \cdot V)$. La búsqueda descendente sobre la última fila cuesta $\mathcal{O}(V)$ en el peor caso y la reconstrucción $\mathcal{O}(n)$. Por lo tanto, el tiempo total está dominado por el cálculo de la matriz y equivale a $\mathcal{O}(n \cdot V)$.
     \item \textbf{Espacial:} $\mathcal{O}(n \cdot V)$. La matriz `dp` debe almacenar estados para los $n$ objetos combinados con todos los beneficios posibles desde $0$ hasta $V$.
 \end{itemize}
+
+\subsection{Sets de datos utilizados}
+Todos los sets se adjuntan en el directorio \texttt{pruebas/} y se midieron con el script \texttt{pruebas/grafico\_pd.py}, que ejecuta ambos algoritmos sobre cada archivo, verifica que devuelvan el mismo beneficio y genera las figuras de esta sección.
+\begin{itemize}
+    \item \textbf{Sets aleatorios} \texttt{mochila10.txt}, \texttt{mochila20.txt}, \texttt{mochila50.txt}, \texttt{mochila90.txt}, \texttt{mochila100.txt}, \texttt{mochila200.txt}, \texttt{mochila300.txt} y \texttt{mochila500.txt}, generados con el \texttt{crear\_mochila.py} de la cátedra: capacidad $W = 50n$, pesos uniformes en $[1, 200]$ y beneficios uniformes en $[1, 1000]$. El criterio fue cubrir dos órdenes de magnitud en $n$ con puntos intermedios suficientes para ajustar una curva. No se incluyó $n = 1000$ porque el planteo alternativo requiere una matriz de $1001 \times 500\,000$ celdas, que no entra en memoria con listas de Python.
+    \item \textbf{Sets \textit{ad-hoc}} \texttt{mochila\_gana\_tradicional.txt} ($n = 50$, $W = 250$, beneficios del orden de $10^5$, $V = 14\,375\,970$) y \texttt{mochila\_gana\_alternativo.txt} ($n = 50$, $W = 12\,500\,000$, beneficios entre $1$ y $7$, $V = 244$). El criterio fue invertir la relación entre $W$ y $V$ para mostrar que el costo de cada algoritmo depende del parámetro que recorre su matriz y no solo de $n$.
+\end{itemize}
+
+Una observación que usamos en el ajuste: con la distribución de \texttt{crear\_mochila.py}, $W = 50n$ y el beneficio total esperado es $E[V] = 500{,}5 \cdot n$. Por lo tanto, sobre estos sets, $n \cdot W = 50n^2$ y $n \cdot V \approx 500n^2$: ambos algoritmos deberían verse cuadráticos en $n$, y el alternativo debería ser alrededor de $10$ veces más lento que el tradicional.
 
 \subsection{Evaluación comparativa de ambos enfoques}
 
 \subsubsection{Comportamiento con variación de \texorpdfstring{$W$}{W} vs. \texorpdfstring{$V$}{V}}
 A la hora de comparar los tiempos empíricos entre ambos enfoques, se evidencia de forma clara el \textit{trade-off} que existe respecto a las variables $W$ (capacidad) y $V$ (beneficio total).
 
-Para casos típicos o estándares (como los generados aleatoriamente con la distribución uniforme del enunciado), la variable $V$ tiende a ser órdenes de magnitud más grande que $W$. En nuestras mediciones sobre $N=10, 20, 50, 90, 100, 500$ (ver tabla \ref{fig:tabla_pd_tiempos}), observamos que el \textbf{Planteo Tradicional es considerablemente más rápido}, tardando escasas fracciones de segundo frente a tiempos notablemente mayores en el enfoque alternativo, que debe reservar y recorrer en memoria una matriz inmensa en el eje de las columnas correspondientes a los beneficios. Ver \ref{fig:pd_10elementos} y \ref{fig:pd_500elementos}.
+Para los sets generados con la distribución del enunciado, $V$ es alrededor de diez veces mayor que $W$. En las mediciones de la Tabla~\ref{tab:tabla_pd_tiempos} y la Figura~\ref{fig:pd_comparacion}, el \textbf{planteo tradicional es consistentemente más rápido}, con una relación entre tiempos que se mantiene entre $14$ y $17$ veces para todos los tamaños. Esa relación es algo mayor que el cociente $V/W \approx 10$ que predice el tamaño de las matrices, lo que atribuimos al costo adicional por celda del alternativo (aritmética con \texttt{float('inf')} y la llamada a \texttt{max}).
 
-\begin{figure}[H]
+\begin{table}[H]
     \centering
-    \includegraphics[width=0.9\textwidth]{pd_tiempos_10elementos.png}
-    \caption{Comparación entre los tiempos del algoritmo con programación dinámica para 10 elementos.}
-    \label{fig:pd_10elementos}
-\end{figure}
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.9\textwidth]{pd_tiempos_500elementos.png}
-    \caption{Comparación entre los tiempos del algoritmo con programación dinámica para 500 elementos.}
-    \label{fig:pd_500elementos}
-\end{figure}
-
-\begin{table}[htpb]
-    \centering
-    \begin{tabular}{ccc}
+    \begin{tabular}{rrrrrr}
         \toprule
-        \textbf{Cantidad de Objetos ($N$)} & \textbf{PD Tradicional (s)} & \textbf{PD Alternativo (s)} \\
+        \textbf{$n$} & \textbf{$W$} & \textbf{$V$} & \textbf{PD Tradicional (s)} & \textbf{PD Alternativo (s)} & \textbf{Alt./Trad.} \\
         \midrule
-        10  & 0.000972 & 0.017179 \\
-        20  & 0.004368 & 0.070814 \\
-        50  & 0.030059 & 0.459072 \\
-        90  & 0.098474 & 1.333460 \\
-        100 & 0.122274 & 1.687137 \\
-        500 & 3.284791 & 46.658851 \\
+        10  & 500   & 4665   & 0.000904 & 0.015621  & 17.3 \\
+        20  & 1000  & 10842  & 0.004331 & 0.074841  & 17.3 \\
+        50  & 2500  & 27537  & 0.028633 & 0.480360  & 16.8 \\
+        90  & 4500  & 44637  & 0.094902 & 1.395703  & 14.7 \\
+        100 & 5000  & 47445  & 0.117335 & 1.629541  & 13.9 \\
+        200 & 10000 & 101222 & 0.478313 & 7.072966  & 14.8 \\
+        300 & 15000 & 155699 & 1.116855 & 16.540967 & 14.8 \\
+        500 & 25000 & 250073 & 3.228582 & 46.124868 & 14.3 \\
         \bottomrule
     \end{tabular}
-    \caption{Tiempos de ejecución experimentales promedio para ambos algoritmos de programación dinámica en sets aleatorios.}
+    \caption{Tiempos de ejecución experimentales (mediana de varias corridas) para ambos algoritmos de programación dinámica en los sets aleatorios.}
     \label{tab:tabla_pd_tiempos}
 \end{table}
 
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{pd_comparacion.png}
+    \caption{Tiempo de ejecución de ambos planteos en función de $n$ sobre los sets aleatorios, en escala logarítmica en ambos ejes.}
+    \label{fig:pd_comparacion}
+\end{figure}
 
-Para demostrar este comportamiento límite con mayor precisión, se diseñaron dos sets de datos \textit{ad-hoc}:
+Para mostrar que la ventaja no es intrínseca del planteo tradicional sino de la relación entre $W$ y $V$, se midieron los dos sets \textit{ad-hoc} descritos en la sección anterior (Tabla~\ref{tab:pd_adhoc}):
 \begin{itemize}
-    \item \textbf{Caso Favorable para el Tradicional:} Se fabricó una mochila de capacidad ínfima ($W=250$) pero con beneficios estratosféricos para sus $N=50$ objetos ($V \approx 14 \cdot 10^6$). Como era de esperar, el algoritmo tradicional resolvió el problema en $0.0026$ segundos, mientras que el alternativo demoró más de $253$ segundos. Ver \ref{fig:pd_ganatradicional}.
-    \item \textbf{Caso Favorable para el Alternativo:} Se invirtieron las condiciones. La mochila poseía una capacidad colosal ($W=12.5 \cdot 10^6$), pero beneficios triviales ($V=233$). Aquí, el algoritmo tradicional colapsó, tardando más de $141$ segundos en iterar sobre la capacidad, mientras que el enfoque alternativo halló la respuesta en tan solo $0.0041$ segundos. Ver \ref{fig:pd_ganaalternativo}.
+    \item \textbf{Caso favorable al tradicional:} capacidad ínfima ($W = 250$) y beneficios enormes ($V \approx 1{,}4 \cdot 10^7$). El tradicional llena una matriz de $51 \times 251$ celdas y responde en milisegundos; el alternativo necesita $51 \times 14\,375\,971$ celdas y demora minutos.
+    \item \textbf{Caso favorable al alternativo:} capacidad colosal ($W = 12{,}5 \cdot 10^6$) y beneficios triviales ($V = 244$). Ahora es el tradicional el que recorre $51 \times 12\,500\,001$ celdas, mientras que el alternativo resuelve una matriz de $51 \times 245$ celdas.
 \end{itemize}
 
-\begin{figure}[H]
+\begin{table}[H]
     \centering
-    \includegraphics[width=0.9\textwidth]{pd_tiempos_ganatradicional.png}
-    \caption{Comparación entre los tiempos del algoritmo con programación dinámica con caso favorable al tradicional.}
-    \label{fig:pd_ganatradicional}
-\end{figure}
+    \begin{tabular}{lrrrrr}
+        \toprule
+        \textbf{Set} & \textbf{$n$} & \textbf{$W$} & \textbf{$V$} & \textbf{PD Tradicional (s)} & \textbf{PD Alternativo (s)} \\
+        \midrule
+        \texttt{mochila\_gana\_tradicional.txt} & 50 & 250        & 14\,375\,970 & 0.0027   & 246.7900 \\
+        \texttt{mochila\_gana\_alternativo.txt} & 50 & 12\,500\,000 & 244        & 137.7966 & 0.0043   \\
+        \bottomrule
+    \end{tabular}
+    \caption{Tiempos de ejecución sobre los sets \textit{ad-hoc} (una corrida cada uno).}
+    \label{tab:pd_adhoc}
+\end{table}
 
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.9\textwidth]{pd_tiempos_ganaalternativo.png}
-    \caption{Comparación entre los tiempos del algoritmo con programación dinámica con caso favorable al alternativo.}
-    \label{fig:pd_ganaalternativo}
-\end{figure}
-
-% TODO: Insertar tabla
-
+En ambos casos el algoritmo cuya matriz es pequeña responde en milisegundos y el otro tarda minutos, con $n$ idéntico. Esto confirma que ninguno de los dos domina al otro: la elección depende de cuál de los dos parámetros, $W$ o $V$, es menor en la instancia a resolver.
 
 \subsubsection{Curvas de ajuste teórico y medición real}
-Las mediciones realizadas y explicadas en el punto anterior validan por completo la complejidad teórica determinada matemáticamente. El tiempo de ejecución del Planteo Tradicional se ajusta de forma perfecta a la curva $\mathcal{O}(n \cdot W)$, viéndose gravemente afectado ante un crecimiento de $W$. Por su parte, el Planteo Alternativo calca el comportamiento de la función $\mathcal{O}(n \cdot V)$, siendo este su principal limitante.
-Ambos enfoques resultan ser algoritmos pseudo-polinomiales exactos con fortalezas opuestas, lo que permite seleccionar el más adecuado basándose estrictamente en la magnitud de los parámetros de entrada. Ver \ref{fig:pd_ajuste}.
+Para contrastar las mediciones con la complejidad calculada se ajustó, por mínimos cuadrados, una recta sin ordenada al origen $T = c \cdot (n \cdot W)$ para el tradicional y $T = c' \cdot (n \cdot V)$ para el alternativo, usando el $W$ y el $V$ reales de cada archivo. La constante resultante se interpreta como el tiempo que tarda cada algoritmo en calcular una celda de su matriz. Como sobre estos sets $W = 50n$ y $V \approx 500n$, las curvas ajustadas se ven como parábolas al graficarlas contra $n$ (Figuras~\ref{fig:pd_tradicional_ajuste} y~\ref{fig:pd_alternativo_ajuste}).
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.9\textwidth]{pd_ajuste.png}
-    \caption{Ajuste de los resultados obtenidos con el enfoque tradicional con una curva cuadrática.}
-    \label{fig:pd_ajuste}
+    \includegraphics[width=\textwidth]{pd_tradicional_ajuste.png}
+    \caption{Planteo tradicional: tiempo medido frente al ajuste $c \cdot n \cdot W$, en escala lineal (izquierda) y logarítmica (derecha).}
+    \label{fig:pd_tradicional_ajuste}
 \end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{pd_alternativo_ajuste.png}
+    \caption{Planteo alternativo: tiempo medido frente al ajuste $c' \cdot n \cdot V$, en escala lineal (izquierda) y logarítmica (derecha).}
+    \label{fig:pd_alternativo_ajuste}
+\end{figure}
+
+Las constantes obtenidas fueron $c = 2{,}25 \cdot 10^{-7}$ s por celda para el tradicional y $c' = 3{,}49 \cdot 10^{-7}$ s por celda para el alternativo. Que el alternativo pague más por celda es coherente con lo observado en la Tabla~\ref{tab:tabla_pd_tiempos}: la relación de tiempos ($14$ a $17$) supera a la relación de tamaños de matriz ($V/W \approx 10$) justamente en el cociente $c'/c \approx 1{,}55$.
+
+En el alternativo el ajuste reproduce todas las mediciones con un error relativo menor al $6\,\%$. En el tradicional el error es menor al $6\,\%$ entre $n = 20$ y $n = 200$, pero el ajuste sobreestima en un $25\,\%$ el punto $n = 10$ y subestima en un $13\,\%$ el punto $n = 500$. Lo primero se explica porque en $n = 10$ la matriz tiene apenas $5\,500$ celdas y el tiempo total (menos de un milisegundo) está dominado por costos fijos. Lo segundo lo atribuimos a que, al crecer $W$, los valores de la fila dejan de caber en la caché del procesador y el costo por celda aumenta levemente; en el alternativo este efecto es menor porque su costo por celda ya es mayor y lo enmascara. En ambos casos, la escala logarítmica muestra que la pendiente de las mediciones coincide con la de la curva teórica en todo el rango, lo que confirma el orden $\mathcal{O}(n \cdot W)$ y $\mathcal{O}(n \cdot V)$ calculado a partir del pseudocódigo.
+
+Ambos enfoques resultan ser algoritmos pseudo-polinomiales exactos con fortalezas opuestas, lo que permite seleccionar el más adecuado basándose estrictamente en la magnitud de los parámetros de entrada: el tradicional cuando $W < V$, que es lo habitual en instancias con beneficios del orden de los pesos o mayores, y el alternativo cuando los beneficios son pequeños frente a la capacidad.
 
 \newpage
 
