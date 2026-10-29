@@ -1,0 +1,17 @@
+Buenas! Su TP está desaprobado por el momento.
+Van a tener que reentregar la parte 1 (FB vs. BT), 3 (PD), y la Conclusión. Las partes 2 y 4 están bien, no hace falta que las reentreguen (mejor dicho, no las pueden reentregar, ya están corregidas, aunque pueden hacer cambios en el informe si precisan). Adjunten todos los archivos de vuelta en la reentrega de todas formas (incluyendo los que no cambiaron).
+Tienen tiempo hasta el domingo 1° a las 23:59, cuando esté la reentrega avisenme por mail o por slack.
+A continuación les dejo correcciones de las partes que tienen que reentregar. Las correcciones de las partes 2 y 4 se las adjunto con la reentrega directamente:
+
+## General
+
+## 3.- PD
+
+- El código entregado no es el mismo que el pseudocódigo del informe. El pseudocódigo tiene un chequeo adicional para verificar que $v_i <= V$ antes de considerar el elemento. Ese chequeo no está presente en el código. La consecuencia es que calculan el peso mínimo para conseguir un beneficio de _al menos_ V (puede ser mayor). Este es el comportamiento de la mayoría de algoritmos que resuelven este problema, no está mal, el error per se es la inconsistencia entre el código y el informe
+- Tienen un "Ver tabla ??" y no hay niguna tabla ??
+- El análisis de ejecución es muy flojo. De los 4 gráficos comparativos, sólo uno tiene un caso del cual se pueden sacar conclusiones razonables. Hay un sólo gráfico de ejecución de un algoritmo respecto a su entrada y no se indica cuál de los dos es
+- No se incluyen sets de datos utilizados para el análisis
+
+## Comparación y conclusión final
+
+- No existe dicha comparación y conclusión final. La última sección del informe es más un resumen que una comparativa.
