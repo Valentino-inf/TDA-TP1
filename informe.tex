@@ -914,11 +914,11 @@ Además, sobre los sets del repositorio (\texttt{mochila10}, \texttt{20}, \textt
         \toprule
         \textbf{Algoritmo} & \textbf{Complejidad Teórica} & \textbf{Ventajas Principales} & \textbf{Limitaciones} \\
         \midrule
-        Fuerza Bruta & $O(2^n)$ & Exacto, simple de formular & Intratable para $n > 30$ \\
-        Backtracking & $O(2^n)$ peor caso & Poda ramas inviables & Depende del orden de poda \\
-        Greedy ($1/2$) & $O(n \log n)$ & Extremadamente veloz & No garantiza óptimo global \\
-        PD Tradicional & $O(n \cdot W)$ & Exacto & Sensible a capacidades $W$ gigantes \\
-        PD Alternativa & $O(n \cdot V)$ & Exacto & Sensible a beneficios $V$ grandes \\
+        Fuerza Bruta & $O(2^n)$ & Exacto, simple de formular & Intratable para $n > 25$ \\
+        Backtracking & $O(2^n)$ peor caso & Exacto; las podas evitan explorar casi todo el árbol & Tiempo dependiente de la instancia; sin cota mejor que $2^n$ \\
+        Greedy ($1/2$) & $O(n \log n)$ & Extremadamente veloz & No exacto: solo garantiza la mitad del óptimo \\
+        PD Tradicional & $O(n \cdot W)$ & Exacto; tiempo predecible, independiente de los valores & Tiempo y memoria crecen con $W$ \\
+        PD Alternativa & $O(n \cdot V)$ & Exacto; tiempo predecible, independiente de los valores & Tiempo y memoria crecen con $V$ \\
         Prog. Lineal & $O(2^n)$ peor caso (\textit{branch and bound}) & Exacto; modelo declarativo, fácil de extender con más restricciones & Costo fijo del solver; depende de bibliotecas externas \\
         \bottomrule
     \end{tabular}
@@ -926,10 +926,70 @@ Además, sobre los sets del repositorio (\texttt{mochila10}, \texttt{20}, \textt
 \end{table}
 
 \subsection{Comparativa de tiempos en rangos comunes}
-Gráfico general consolidado que enfrente los 6 algoritmos en el rango de tamaños donde todos fueron computacionalmente viables.
+\label{sec:conclusion_tiempos}
+
+Para comparar los seis algoritmos en igualdad de condiciones se los corrió a todos sobre los mismos archivos: los sets \texttt{mochila10} a \texttt{mochila1000} de \texttt{pruebas/}, generados con \texttt{crear\_mochila.py} (capacidad $W = 50n$, pesos entre $1$ y $200$, beneficios entre $1$ y $1000$). Las mediciones se hicieron con \texttt{pruebas/grafico\_conclusion.py}, en la misma máquina y la misma sesión para todos los algoritmos. Cada tiempo es la mediana de varias corridas (más repeticiones para los algoritmos rápidos, una sola para las corridas que superan los $10$ s). Los tiempos por set quedan en \texttt{pruebas/conclusion\_tiempos.csv}.
+
+El rango en que fue posible comparar a los seis es $n \le 20$: fuerza bruta tarda $1$ s en \texttt{mochila20} y, como duplica su tiempo con cada objeto adicional, en $n = 25$ tardaría del orden de medio minuto y en $n = 30$ cerca de media hora. El planteo alternativo de programación dinámica se midió hasta $n = 500$ porque en $n = 1000$ su matriz de $1001 \times 500\,000$ celdas no entra en memoria (Sección~\ref{sec:problema3}). Los otros cuatro algoritmos se compararon en todo el rango.
+
+\begin{table}[h!]
+    \centering
+    \small
+    \begin{tabular}{@{}rcccccc@{}}
+        \toprule
+        $n$ & \textbf{Fuerza bruta} & \textbf{Backtracking} & \textbf{Greedy} & \textbf{PD trad.} & \textbf{PD alt.} & \textbf{Prog. lineal} \\ \midrule
+        10   & $6.10 \cdot 10^{-4}$ & $1.58 \cdot 10^{-5}$ & $2.18 \cdot 10^{-6}$ & $8.98 \cdot 10^{-4}$ & $1.54 \cdot 10^{-2}$ & $5.73 \cdot 10^{-3}$ \\
+        20   & $9.87 \cdot 10^{-1}$ & $4.29 \cdot 10^{-5}$ & $4.01 \cdot 10^{-6}$ & $4.26 \cdot 10^{-3}$ & $7.37 \cdot 10^{-2}$ & $7.43 \cdot 10^{-3}$ \\
+        50   & -- & $2.74 \cdot 10^{-4}$ & $8.95 \cdot 10^{-6}$ & $2.79 \cdot 10^{-2}$ & $4.70 \cdot 10^{-1}$ & $1.72 \cdot 10^{-2}$ \\
+        90   & -- & $5.31 \cdot 10^{-4}$ & $1.67 \cdot 10^{-5}$ & $9.42 \cdot 10^{-2}$ & $1.38 \cdot 10^{0}$  & $1.22 \cdot 10^{-2}$ \\
+        100  & -- & $7.71 \cdot 10^{-4}$ & $1.97 \cdot 10^{-5}$ & $1.16 \cdot 10^{-1}$ & $1.63 \cdot 10^{0}$  & $7.43 \cdot 10^{-3}$ \\
+        200  & -- & $2.28 \cdot 10^{-3}$ & $3.97 \cdot 10^{-5}$ & $4.72 \cdot 10^{-1}$ & $7.00 \cdot 10^{0}$  & $2.18 \cdot 10^{-2}$ \\
+        300  & -- & $6.14 \cdot 10^{-3}$ & $6.40 \cdot 10^{-5}$ & $1.10 \cdot 10^{0}$  & $1.64 \cdot 10^{1}$  & $1.88 \cdot 10^{-2}$ \\
+        500  & -- & $1.40 \cdot 10^{-2}$ & $1.14 \cdot 10^{-4}$ & $3.18 \cdot 10^{0}$  & $4.49 \cdot 10^{1}$  & $2.93 \cdot 10^{-2}$ \\
+        1000 & -- & $6.99 \cdot 10^{-2}$ & $2.50 \cdot 10^{-4}$ & $1.32 \cdot 10^{1}$  & -- & $1.32 \cdot 10^{-1}$ \\
+        \bottomrule
+    \end{tabular}
+    \caption{Tiempo de ejecución (en segundos) de los seis algoritmos sobre los mismos sets. ``--'' indica que el algoritmo no se corrió para ese tamaño.}
+    \label{tab:conclusion_tiempos}
+\end{table}
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=\textwidth]{conclusion_tiempos.png}
+    \caption{Tiempos de la Tabla~\ref{tab:conclusion_tiempos} en escala logarítmica en ambos ejes. En esta escala, una recta corresponde a un crecimiento polinomial y su pendiente es el exponente.}
+    \label{fig:conclusion_tiempos}
+\end{figure}
+
+La Figura~\ref{fig:conclusion_tiempos} muestra que, salvo por el cruce entre programación lineal y programación dinámica, el orden entre los algoritmos es el mismo en todo el rango medido: greedy es el más rápido, seguido por backtracking, programación dinámica tradicional y programación dinámica alternativa. Observaciones por algoritmo:
+
+\begin{itemize}
+    \item \textbf{Fuerza bruta} es el único cuyo tiempo se dispara: pasa de $0.6$ ms a $1$ s al ir de $n = 10$ a $n = 20$, un factor $1600$ para un factor $2$ en la entrada. Eso es lo que predice $O(2^n)$: $2^{10} = 1024$ veces más combinaciones, cada una un poco más larga de evaluar. Ya en $n = 20$ es $20\,000$ veces más lento que backtracking, que resuelve exactamente el mismo problema con el mismo resultado. En la práctica solo sirve como referencia para validar a los demás en instancias chicas.
+
+    \item \textbf{Backtracking} fue el algoritmo exacto más rápido en todos los sets: resuelve $n = 1000$ en $70$ ms, $190$ veces más rápido que programación dinámica tradicional y el doble de rápido que programación lineal. En escala logarítmica su curva es casi una recta de pendiente cercana a $2$ (de $n = 100$ a $n = 1000$ el tiempo crece $\times 90$), muy lejos del $2^n$ del peor caso. La razón es la distribución de los datos: con los objetos ordenados por beneficio/peso, la primera hoja que visita es la solución greedy, cuyo beneficio ya está a menos del $6\,\%$ del óptimo, y la cota fraccionaria queda tan ajustada que casi todas las ramas restantes se podan de inmediato. Esta ventaja no está garantizada: sobre una instancia construida para que la cota no discrimine, el tiempo vuelve a ser exponencial.
+
+    \item \textbf{Greedy} es entre $7$ y $280$ veces más rápido que backtracking y entre $400$ y $50\,000$ veces más rápido que programación dinámica tradicional, con un crecimiento $n \log n$ que en el gráfico se ve como la recta de menor pendiente. Hay que tener en cuenta que es el único de los seis que no es exacto: en $7$ de los $9$ sets devolvió un beneficio menor al óptimo (por ejemplo, $8766$ frente a $9298$ en \texttt{mochila20}), aunque siempre dentro de la garantía $1/2$ y, de hecho, nunca por debajo del $94\,\%$ del óptimo. Por eso su tiempo no es directamente comparable con el de los exactos: compra velocidad con precisión.
+
+    \item \textbf{Programación dinámica} es el método cuyo tiempo no depende de los valores concretos de los datos sino solo de $n$ y de $W$ (o $V$), lo que lo hace predecible, pero sobre estos sets esa predicción es desfavorable: como $W = 50n$ y $V \approx 500n$, el costo $n \cdot W$ crece como $50n^2$ y el costo $n \cdot V$ como $500n^2$. Ambas curvas son rectas de pendiente $2$ en el gráfico, el planteo alternativo unas $15$ veces por encima del tradicional (Sección~\ref{sec:problema3}). Son los dos métodos exactos más lentos en todo el rango: en $n = 1000$ el tradicional tarda $13$ s, contra $0.07$ s de backtracking. Como se mostró con los sets ad-hoc de la Sección~\ref{sec:problema3}, esta relación se invierte si $W$ (o $V$) es pequeño frente a $n$.
+
+    \item \textbf{Programación lineal} es el único cuyo tiempo casi no depende de $n$ en este rango: entre $6$ y $30$ ms hasta $n = 500$, porque domina el costo fijo de lanzar CBC y comunicarse con él por archivos. Esa constante lo hace el método exacto más lento para $n \le 20$ (más lento incluso que fuerza bruta en $n = 10$), pero a partir de $n \approx 50$ cruza a programación dinámica tradicional y en $n = 1000$ es $100$ veces más rápido que ella. Las subidas y bajadas de su curva (por ejemplo, entre $n = 90$ y $n = 100$) no son ruido de medición sino la cantidad de nodos que explora el solver, que varía de una instancia a otra.
+\end{itemize}
+
+Como verificación, los cinco algoritmos exactos devolvieron el mismo beneficio en todos los sets en que se corrieron (columnas \texttt{beneficio\_*} de \texttt{conclusion\_tiempos.csv}), y en ningún caso la solución superó la capacidad.
 
 \subsection{Conclusiones finales}
-Balance grupal sobre el compromiso entre tiempo de cálculo, consumo de memoria y exactitud de la solución obtenida.
+
+\textbf{La complejidad teórica no ordena a los algoritmos en la práctica.} Si se los ordenara por su cota de peor caso, fuerza bruta, backtracking y programación lineal ($O(2^n)$) deberían ser los más lentos y los dos planteos de programación dinámica (pseudo-polinomiales) y greedy ($O(n \log n)$) los más rápidos. Lo que se midió es casi lo contrario: con excepción de fuerza bruta, los dos algoritmos con peor cota fueron los exactos más rápidos, y los pseudo-polinomiales los más lentos. La cota de peor caso es una garantía, no una predicción: backtracking y el \textit{branch and bound} de CBC explotan la estructura de la instancia (una cota superior ajustada) y en estos sets podan casi todo, mientras que programación dinámica paga siempre el costo completo de su matriz, y sobre estos sets ese costo crece cuadráticamente porque $W$ y $V$ crecen con $n$.
+
+\textbf{El orden depende de la instancia, no solo de $n$.} Los sets de \texttt{crear\_mochila.py} tienen capacidad proporcional a $n$ y beneficios del orden de los pesos, y esa distribución favorece a las podas y perjudica a programación dinámica. Los experimentos de la Sección~\ref{sec:problema3} mostraron que, con $W = 250$ o $V = 244$, el planteo de programación dinámica correspondiente responde en milisegundos; y, a la inversa, una instancia diseñada para que la cota fraccionaria no discrimine haría que backtracking explorara una fracción grande de las $2^n$ ramas. Ningún algoritmo domina a los demás en todas las instancias.
+
+\textbf{Qué conviene usar.} Para instancias como las del enunciado, el balance entre tiempo y exactitud que surge de las mediciones es:
+\begin{itemize}
+    \item \textbf{Greedy} cuando basta una solución aproximada: es órdenes de magnitud más rápido que cualquier exacto y en estos sets nunca se alejó más de un $6\,\%$ del óptimo, aunque la garantía solo asegura la mitad.
+    \item \textbf{Backtracking} como primera opción exacta: fue el más rápido en todos los tamaños y resolvió $n = 1000$ en una fracción de segundo, con la salvedad de que su tiempo no está acotado por nada mejor que $2^n$ y puede degradarse en instancias adversas.
+    \item \textbf{Programación lineal} cuando se quiere una solución exacta con tiempo poco sensible a la instancia y al tamaño, o cuando el modelo va a crecer con más restricciones: su costo fijo de decenas de milisegundos solo pesa en instancias chicas.
+    \item \textbf{Programación dinámica} cuando $W$ (planteo tradicional) o $V$ (planteo alternativo) es pequeño frente a $n$, o cuando se necesita un tiempo garantizado que no dependa de los valores de los datos; en los sets del enunciado es la opción exacta más lenta y la que más memoria consume.
+    \item \textbf{Fuerza bruta} únicamente como referencia para verificar a los demás con $n \le 20$.
+\end{itemize}
 
 \newpage
 
